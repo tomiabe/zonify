@@ -657,9 +657,8 @@ const App = () => {
                   <h1>{formatTime(activeDate, city.timezone)}</h1>
                   <p>
                     <span className="badge" style={{ marginRight: '6px' }}>{formatOffsetLabel(hourOffset)}</span>
-                    {getTimezoneAbbreviation(activeDate, city.timezone)}
+                    {getTimezoneAbbreviation(activeDate, city.timezone)} • {formatDate(activeDate, city.timezone)}
                   </p>
-                  <p className="zone-date">{formatDate(activeDate, city.timezone)}</p>
                 </div>
               </div>
             );
