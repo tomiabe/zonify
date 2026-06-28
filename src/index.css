@@ -544,6 +544,13 @@ body {
   letter-spacing: 0.5px;
 }
 
+.zone-date {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  opacity: 0.85;
+}
+
 /* Settings Dropdown/Panel */
 .settings-container {
   position: relative;

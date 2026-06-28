@@ -294,18 +294,6 @@ const App = () => {
     }
   };
 
-  const getUTCOffsetLabel = (date: Date, timezone: string) => {
-    try {
-      const parts = new Intl.DateTimeFormat('en-US', {
-        timeZone: timezone,
-        timeZoneName: 'longOffset'
-      }).formatToParts(date);
-      return parts.find(p => p.type === 'timeZoneName')?.value || '';
-    } catch (e) {
-      return '';
-    }
-  };
-
   // --- Grid Filtering ---
   const filteredGridCities = gridCities.filter(city => {
     if (!searchQuery) return true;
@@ -559,7 +547,7 @@ const App = () => {
               <Globe size={16} /> 24-Hour Timeline (Base: {homeCity.name})
             </span>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              Hover or click bars to travel in time
+              Click bars to travel in time
             </span>
           </div>
 
@@ -669,8 +657,9 @@ const App = () => {
                   <h1>{formatTime(activeDate, city.timezone)}</h1>
                   <p>
                     <span className="badge" style={{ marginRight: '6px' }}>{formatOffsetLabel(hourOffset)}</span>
-                    {getTimezoneAbbreviation(activeDate, city.timezone)} • {getUTCOffsetLabel(activeDate, city.timezone)}
+                    {getTimezoneAbbreviation(activeDate, city.timezone)}
                   </p>
+                  <p className="zone-date">{formatDate(activeDate, city.timezone)}</p>
                 </div>
               </div>
             );
