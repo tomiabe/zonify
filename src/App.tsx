@@ -408,8 +408,6 @@ const App = () => {
           />
         </div>
         
-        <div className="sidebar-spacer" />
-        
         {/* Local Time Card */}
         <div className="local-time-card">
           <div className="local-time-header">
@@ -591,8 +589,7 @@ const App = () => {
                       height,
                       border: isCurrentHour ? '2px solid var(--accent-blue)' : undefined,
                     }}
-                    onClick={() => setScrubbedHour(i)}
-                    onMouseEnter={() => setScrubbedHour(i)}
+                    onClick={() => setScrubbedHour(i === scrubbedHour ? null : i)}
                     title={`${i === 0 ? '12 AM' : i === 12 ? '12 PM' : i > 12 ? `${i - 12} PM` : `${i} AM`} in ${homeCity.name} ${isCurrentHour ? '(Current Hour)' : ''}`}
                   />
                 );
