@@ -131,6 +131,11 @@ const App = () => {
     return DEFAULT_FAVORITE_IDS;
   });
 
+  const [autoTheme, setAutoTheme] = useState<boolean>(() => {
+    const saved = localStorage.getItem('zonify_auto_theme');
+    return saved ? saved === 'true' : true;
+  });
+
   // --- UI & Application States ---
   const [currentTime, setCurrentTime] = useState(new Date());
   const [scrubbedHour, setScrubbedHour] = useState<number | null>(null);
@@ -149,6 +154,21 @@ const App = () => {
     document.body.className = theme === 'light' ? 'light-theme' : '';
     localStorage.setItem('zonify_theme', theme);
   }, [theme]);
+
+  // Auto-theme: switch based on home city time of day (light 6a-6p, dark 6p-6a)
+  useEffect(() => {
+    if (!autoTheme) return;
+    const homeHour = parseInt(
+      new Intl.DateTimeFormat('en-US', {
+        timeZone: homeCity.timezone,
+        hour: 'numeric',
+        hour12: false,
+      }).format(currentTime),
+      10
+    );
+    const computedTheme = homeHour >= 6 && homeHour < 18 ? 'light' : 'dark';
+    setTheme(computedTheme);
+  }, [currentTime, homeCity, autoTheme]);
 
   // Persistent stores sync
   useEffect(() => {
@@ -170,6 +190,10 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('zonify_favorites', JSON.stringify(favorites));
   }, [favorites]);
+
+  useEffect(() => {
+    localStorage.setItem('zonify_auto_theme', String(autoTheme));
+  }, [autoTheme]);
 
   // Click outside listener to dismiss settings dropdown
   useEffect(() => {
@@ -347,6 +371,7 @@ const App = () => {
     setGridCities(DEFAULT_GRID_IDS.map(id => CITY_DATABASE.find(c => c.id === id)).filter(Boolean) as City[]);
     setFavorites(DEFAULT_FAVORITE_IDS);
     setHomeCity(CITY_DATABASE.find(c => c.id === 'sfo') || CITY_DATABASE[0]);
+    setAutoTheme(true);
     setScrubbedHour(null);
     setIsSettingsOpen(false);
   };
@@ -445,8 +470,11 @@ const App = () => {
             {/* Theme Toggle Button */}
             <button 
               className="btn-icon" 
-              onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')}
-              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              onClick={() => {
+                setAutoTheme(false);
+                setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+              }}
+              title={autoTheme ? `Auto (${theme === 'dark' ? 'Dark' : 'Light'})` : theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}
             >
               {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
@@ -484,6 +512,18 @@ const App = () => {
                         type="checkbox" 
                         checked={showSeconds}
                         onChange={(e) => setShowSeconds(e.target.checked)}
+                      />
+                      <span className="slider"></span>
+                    </label>
+                  </div>
+
+                  <div className="settings-option">
+                    <span className="settings-label">Auto Theme (follows sun)</span>
+                    <label className="toggle-switch">
+                      <input 
+                        type="checkbox" 
+                        checked={autoTheme}
+                        onChange={(e) => setAutoTheme(e.target.checked)}
                       />
                       <span className="slider"></span>
                     </label>
@@ -549,7 +589,7 @@ const App = () => {
                       height,
                       border: isCurrentHour ? '2px solid var(--accent-blue)' : undefined,
                     }}
-                    onClick={() => setScrubbedHour(i === scrubbedHour ? null : i)}
+                    onClick={() => setScrubbedHour(i)}
                     onMouseEnter={() => setScrubbedHour(i)}
                     title={`${i === 0 ? '12 AM' : i === 12 ? '12 PM' : i > 12 ? `${i - 12} PM` : `${i} AM`} in ${homeCity.name} ${isCurrentHour ? '(Current Hour)' : ''}`}
                   />
