@@ -847,6 +847,10 @@ input:checked + .slider:before {
   background: var(--text-secondary);
 }
 
+.sidebar-actions {
+  display: none;
+}
+
 @media (max-width: 1024px) {
   .app-container {
     flex-direction: column;
@@ -858,9 +862,51 @@ input:checked + .slider:before {
     border-bottom: 1px solid var(--border-color);
     padding: 24px 20px;
     gap: 24px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .sidebar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
   .main-content {
     padding: 24px 20px;
     overflow: visible;
   }
+  .desktop-only {
+    display: none !important;
+  }
+  .fab {
+    display: flex;
+  }
+}
+
+.fab {
+  display: none;
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: var(--accent-blue);
+  color: white;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+  z-index: 100;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fab:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 24px rgba(59, 130, 246, 0.5);
+}
+
+.fab:active {
+  transform: scale(0.95);
 }

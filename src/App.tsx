@@ -384,6 +384,89 @@ const App = () => {
           </div>
           Zonify
         </div>
+
+        <div className="sidebar-actions">
+          <button 
+            className="btn-icon" 
+            onClick={() => {
+              setAutoTheme(false);
+              setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+            }}
+            title={autoTheme ? `Auto (${theme === 'dark' ? 'Dark' : 'Light'})` : theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}
+          >
+            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+
+          <div className="settings-container" ref={settingsRef}>
+            <button 
+              className="btn-icon" 
+              onClick={() => setIsSettingsOpen(prev => !prev)}
+              title="Configuration Settings"
+            >
+              <Settings size={20} />
+            </button>
+            
+            {isSettingsOpen && (
+              <div className="settings-dropdown">
+                <div className="settings-title">SETTINGS</div>
+                
+                <div className="settings-option">
+                  <span className="settings-label">24-Hour Format</span>
+                  <label className="toggle-switch">
+                    <input 
+                      type="checkbox" 
+                      checked={timeFormat === '24h'}
+                      onChange={(e) => setTimeFormat(e.target.checked ? '24h' : '12h')}
+                    />
+                    <span className="slider"></span>
+                  </label>
+                </div>
+
+                <div className="settings-option">
+                  <span className="settings-label">Show Seconds</span>
+                  <label className="toggle-switch">
+                    <input 
+                      type="checkbox" 
+                      checked={showSeconds}
+                      onChange={(e) => setShowSeconds(e.target.checked)}
+                    />
+                    <span className="slider"></span>
+                  </label>
+                </div>
+
+                <div className="settings-option">
+                  <span className="settings-label">Auto Theme (follows sun)</span>
+                  <label className="toggle-switch">
+                    <input 
+                      type="checkbox" 
+                      checked={autoTheme}
+                      onChange={(e) => setAutoTheme(e.target.checked)}
+                    />
+                    <span className="slider"></span>
+                  </label>
+                </div>
+
+                <button 
+                  className="btn-primary" 
+                  onClick={handleResetDefaults}
+                  style={{ 
+                    marginTop: '8px', 
+                    width: '100%', 
+                    justifyContent: 'center',
+                    padding: '8px',
+                    fontSize: '0.8rem',
+                    backgroundColor: 'transparent',
+                    border: '1px solid var(--border-color)',
+                    color: 'var(--text-primary)',
+                    boxShadow: 'none'
+                  }}
+                >
+                  <RefreshCw size={12} /> Reset to Defaults
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
         
         <div className="search-container">
           <Search className="search-icon" size={16} />
@@ -450,93 +533,10 @@ const App = () => {
             <h1>World Clock</h1>
             <p>Compare times across {gridCities.length} active zones</p>
           </div>
-          <div className="actions">
+          <div className="actions desktop-only">
             <button className="btn-primary" onClick={() => setIsAddModalOpen(true)}>
               <Plus size={16} /> Add Zone
             </button>
-
-            {/* Theme Toggle Button */}
-            <button 
-              className="btn-icon" 
-              onClick={() => {
-                setAutoTheme(false);
-                setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-              }}
-              title={autoTheme ? `Auto (${theme === 'dark' ? 'Dark' : 'Light'})` : theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}
-            >
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-
-            {/* Settings Button */}
-            <div className="settings-container" ref={settingsRef}>
-              <button 
-                className="btn-icon" 
-                onClick={() => setIsSettingsOpen(prev => !prev)}
-                title="Configuration Settings"
-              >
-                <Settings size={20} />
-              </button>
-              
-              {isSettingsOpen && (
-                <div className="settings-dropdown">
-                  <div className="settings-title">SETTINGS</div>
-                  
-                  <div className="settings-option">
-                    <span className="settings-label">24-Hour Format</span>
-                    <label className="toggle-switch">
-                      <input 
-                        type="checkbox" 
-                        checked={timeFormat === '24h'}
-                        onChange={(e) => setTimeFormat(e.target.checked ? '24h' : '12h')}
-                      />
-                      <span className="slider"></span>
-                    </label>
-                  </div>
-
-                  <div className="settings-option">
-                    <span className="settings-label">Show Seconds</span>
-                    <label className="toggle-switch">
-                      <input 
-                        type="checkbox" 
-                        checked={showSeconds}
-                        onChange={(e) => setShowSeconds(e.target.checked)}
-                      />
-                      <span className="slider"></span>
-                    </label>
-                  </div>
-
-                  <div className="settings-option">
-                    <span className="settings-label">Auto Theme (follows sun)</span>
-                    <label className="toggle-switch">
-                      <input 
-                        type="checkbox" 
-                        checked={autoTheme}
-                        onChange={(e) => setAutoTheme(e.target.checked)}
-                      />
-                      <span className="slider"></span>
-                    </label>
-                  </div>
-
-                  <button 
-                    className="btn-primary" 
-                    onClick={handleResetDefaults}
-                    style={{ 
-                      marginTop: '8px', 
-                      width: '100%', 
-                      justifyContent: 'center',
-                      padding: '8px',
-                      fontSize: '0.8rem',
-                      backgroundColor: 'transparent',
-                      border: '1px solid var(--border-color)',
-                      color: 'var(--text-primary)',
-                      boxShadow: 'none'
-                    }}
-                  >
-                    <RefreshCw size={12} /> Reset to Defaults
-                  </button>
-                </div>
-              )}
-            </div>
           </div>
         </header>
 
@@ -764,6 +764,11 @@ const App = () => {
           </div>
         </div>
       )}
+
+      {/* Floating Add Zone button (mobile) */}
+      <button className="fab" onClick={() => setIsAddModalOpen(true)} title="Add Zone">
+        <Plus size={24} />
+      </button>
     </div>
   );
 };
