@@ -408,7 +408,9 @@ const App = () => {
           />
         </div>
         
-        {/* Local Time Card - Center Aligned perfectly (x and y axis) & dynamic */}
+        <div className="sidebar-spacer" />
+        
+        {/* Local Time Card */}
         <div className="local-time-card">
           <div className="local-time-header">
             <MapPin size={12} /> HOME TIME
