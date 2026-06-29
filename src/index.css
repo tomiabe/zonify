@@ -1022,7 +1022,6 @@ input:checked + .slider:before {
 }
 
 .sidebar-actions {
-  display: flex;
   align-items: center;
   gap: 8px;
 }
@@ -1073,9 +1072,16 @@ input:checked + .slider:before {
   .desktop-only {
     display: none !important;
   }
+  .mobile-only {
+    display: flex;
+  }
   .fab {
     display: flex;
   }
+}
+
+.mobile-only {
+  display: none;
 }
 
 .fab {
