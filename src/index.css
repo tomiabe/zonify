@@ -186,17 +186,13 @@ body {
 }
 
 .local-city {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-weight: 600;
   margin-top: 2px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 100%;
 }
 
 .local-time {
-  font-size: 2.35rem;
+  font-size: 2rem;
   font-weight: 700;
   font-family: var(--font-mono);
   margin: 2px 0;
