@@ -186,13 +186,17 @@ body {
 }
 
 .local-city {
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   font-weight: 600;
   margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 .local-time {
-  font-size: 2rem;
+  font-size: 1.7rem;
   font-weight: 700;
   font-family: var(--font-mono);
   margin: 2px 0;
@@ -1081,7 +1085,7 @@ input:checked + .slider:before {
     width: 100%;
     border-right: none;
     border-bottom: none;
-    padding: 172px 20px 24px;
+    padding: 142px 20px 24px;
     gap: 24px;
     position: static;
   }

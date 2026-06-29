@@ -524,7 +524,7 @@ const App = () => {
           <div className="local-time-header">
             <MapPin size={12} /> HOME TIME
           </div>
-          <div className="local-city">{homeCity.name}, {homeCity.country}</div>
+          <div className="local-city" title={`${homeCity.name}, ${homeCity.country}`}>{homeCity.name}, {homeCity.country}</div>
           <div className="local-time">
             {formatTime(activeDate, homeCity.timezone, showSeconds && scrubbedHour === null)}
           </div>
