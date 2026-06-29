@@ -79,6 +79,7 @@ body {
 .app-container {
   display: flex;
   height: 100vh;
+  height: 100svh;
   width: 100vw;
   overflow: hidden;
 }
@@ -1082,7 +1083,7 @@ input:checked + .slider:before {
     width: 100%;
     border-right: none;
     border-bottom: none;
-    padding: 160px 20px 24px;
+    padding: 170px 20px 24px;
     gap: 24px;
     position: static;
   }
