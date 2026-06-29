@@ -189,10 +189,7 @@ body {
   font-size: 0.88rem;
   font-weight: 600;
   margin-top: 2px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 100%;
+  width: 100%;
 }
 
 .local-time {
