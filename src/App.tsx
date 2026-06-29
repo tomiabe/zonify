@@ -568,75 +568,75 @@ const App = () => {
               {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
 
-            <div className="settings-container" ref={settingsRef}>
-              <button 
-                className="btn-icon" 
-                onClick={() => setIsSettingsOpen(prev => !prev)}
-                title="Configuration Settings"
-              >
-                <Settings size={20} />
-              </button>
-              
-              {isSettingsOpen && (
-                <div className="settings-dropdown">
-                  <div className="settings-title">SETTINGS</div>
-                  
-                  <div className="settings-option">
-                    <span className="settings-label">24-Hour Format</span>
-                    <label className="toggle-switch">
-                      <input 
-                        type="checkbox" 
-                        checked={timeFormat === '24h'}
-                        onChange={(e) => setTimeFormat(e.target.checked ? '24h' : '12h')}
-                      />
-                      <span className="slider"></span>
-                    </label>
-                  </div>
+            <button 
+              className="btn-icon" 
+              onClick={() => setIsSettingsOpen(prev => !prev)}
+              title="Configuration Settings"
+            >
+              <Settings size={20} />
+            </button>
+          </div>
 
-                  <div className="settings-option">
-                    <span className="settings-label">Show Seconds</span>
-                    <label className="toggle-switch">
-                      <input 
-                        type="checkbox" 
-                        checked={showSeconds}
-                        onChange={(e) => setShowSeconds(e.target.checked)}
-                      />
-                      <span className="slider"></span>
-                    </label>
-                  </div>
-
-                  <div className="settings-option">
-                    <span className="settings-label">Auto Theme (follows sun)</span>
-                    <label className="toggle-switch">
-                      <input 
-                        type="checkbox" 
-                        checked={autoTheme}
-                        onChange={(e) => setAutoTheme(e.target.checked)}
-                      />
-                      <span className="slider"></span>
-                    </label>
-                  </div>
-
-                  <button 
-                    className="btn-primary" 
-                    onClick={handleResetDefaults}
-                    style={{ 
-                      marginTop: '8px', 
-                      width: '100%', 
-                      justifyContent: 'center',
-                      padding: '8px',
-                      fontSize: '0.8rem',
-                      backgroundColor: 'transparent',
-                      border: '1px solid var(--border-color)',
-                      color: 'var(--text-primary)',
-                      boxShadow: 'none'
-                    }}
-                  >
-                    <RefreshCw size={12} /> Reset to Defaults
-                  </button>
+          <div className="settings-container" ref={settingsRef}>
+            {isSettingsOpen && (
+              <div className="settings-dropdown">
+                <div className="settings-title">SETTINGS</div>
+                
+                <div className="settings-option">
+                  <span className="settings-label">24-Hour Format</span>
+                  <label className="toggle-switch">
+                    <input 
+                      type="checkbox" 
+                      checked={timeFormat === '24h'}
+                      onChange={(e) => setTimeFormat(e.target.checked ? '24h' : '12h')}
+                    />
+                    <span className="slider"></span>
+                  </label>
                 </div>
-              )}
-            </div>
+
+                <div className="settings-option">
+                  <span className="settings-label">Show Seconds</span>
+                  <label className="toggle-switch">
+                    <input 
+                      type="checkbox" 
+                      checked={showSeconds}
+                      onChange={(e) => setShowSeconds(e.target.checked)}
+                    />
+                    <span className="slider"></span>
+                  </label>
+                </div>
+
+                <div className="settings-option">
+                  <span className="settings-label">Auto Theme (follows sun)</span>
+                  <label className="toggle-switch">
+                    <input 
+                      type="checkbox" 
+                      checked={autoTheme}
+                      onChange={(e) => setAutoTheme(e.target.checked)}
+                    />
+                    <span className="slider"></span>
+                  </label>
+                </div>
+
+                <button 
+                  className="btn-primary" 
+                  onClick={handleResetDefaults}
+                  style={{ 
+                    marginTop: '8px', 
+                    width: '100%', 
+                    justifyContent: 'center',
+                    padding: '8px',
+                    fontSize: '0.8rem',
+                    backgroundColor: 'transparent',
+                    border: '1px solid var(--border-color)',
+                    color: 'var(--text-primary)',
+                    boxShadow: 'none'
+                  }}
+                >
+                  <RefreshCw size={12} /> Reset to Defaults
+                </button>
+              </div>
+            )}
           </div>
         </header>
 
