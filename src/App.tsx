@@ -302,8 +302,7 @@ const App = () => {
   };
 
   const formatOffsetLabel = (offset: number) => {
-    if (offset === 0) return 'home';
-    return offset > 0 ? `+${offset}h` : `${offset}h`;
+    return offset > 0 ? `+${offset}h` : offset < 0 ? `${offset}h` : '+0h';
   };
 
   // Standard string formatters
@@ -457,7 +456,7 @@ const App = () => {
             <input 
               type="text" 
               className="search-input" 
-              placeholder="Search active..." 
+              placeholder="Search cities..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />

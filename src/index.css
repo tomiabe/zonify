@@ -1074,7 +1074,7 @@ input:checked + .slider:before {
     width: 100%;
     border-right: none;
     border-bottom: none;
-    padding: 148px 20px 24px;
+    padding: 172px 20px 24px;
     gap: 24px;
     position: static;
   }
@@ -1112,5 +1112,13 @@ input:checked + .slider:before {
   }
   .fab {
     display: flex;
+  }
+  .city-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+  .city-item > div:last-child {
+    justify-content: flex-end;
   }
 }
