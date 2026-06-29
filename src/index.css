@@ -198,58 +198,6 @@ body {
   opacity: 0.9;
 }
 
-/* Favorites */
-.favorites-section {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  flex: 1;
-  overflow-y: auto;
-  padding-right: 4px;
-}
-
-.favorites-title {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  padding-bottom: 4px;
-}
-
-.favorite-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 14px;
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.favorite-item:hover {
-  background-color: var(--bg-card-hover);
-  border-color: var(--accent-blue);
-  transform: translateX(4px);
-}
-
-.favorite-name {
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.favorite-time {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-mono);
-  color: var(--text-secondary);
-  font-size: 0.82rem;
-}
-
 .badge {
   background-color: var(--badge-bg);
   color: var(--accent-blue);
@@ -257,6 +205,232 @@ body {
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 12px;
+}
+
+/* Favorites Accordion */
+.favorites-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.favorites-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.fav-group {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.fav-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  cursor: pointer;
+  background: var(--bg-card);
+  transition: background 0.15s;
+  user-select: none;
+}
+
+.fav-group-header:hover {
+  background: var(--bg-card-hover);
+}
+
+.fav-group-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 0;
+}
+
+.fav-group-name .chevron {
+  flex-shrink: 0;
+}
+
+.fav-group-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.fav-group-body {
+  border-top: 1px solid var(--border-color);
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--bg-sidebar);
+}
+
+/* Person avatar initials */
+.person-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--accent-blue);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.person-avatar.small {
+  width: 22px;
+  height: 22px;
+  font-size: 0.6rem;
+}
+
+.fav-person-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 4px;
+  border-radius: 6px;
+}
+
+.fav-person-name {
+  flex: 1;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.person-item-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.fav-person-item:hover .person-item-remove {
+  opacity: 1;
+}
+
+.person-item-remove:hover {
+  color: var(--accent-red);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.add-person-inline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.person-input-small {
+  flex: 1;
+  background: var(--bg-dark);
+  border: 1px solid var(--accent-blue);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 0.75rem;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.btn-icon-small {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-blue);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 8px;
+  cursor: pointer;
+}
+
+.btn-add-person-fav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: none;
+  border: 1px dashed var(--border-color);
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  padding: 5px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+.btn-add-person-fav:hover {
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+
+/* Card person avatars */
+.card-people {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color);
+}
+
+.card-person {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: 20px;
+  padding: 2px 8px 2px 2px;
+}
+
+.card-person-name {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.card-person-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 1px;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.card-person:hover .card-person-remove {
+  opacity: 1;
+}
+
+.card-person-remove:hover {
+  color: var(--accent-red);
 }
 
 /* Main Content */

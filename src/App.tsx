@@ -11,7 +11,8 @@ import {
   X, 
   Star, 
   RefreshCw, 
-  Check 
+  Check,
+  ChevronDown
 } from 'lucide-react';
 
 interface City {
@@ -20,6 +21,12 @@ interface City {
   country: string;
   region: string;
   timezone: string;
+}
+
+interface Person {
+  id: string;
+  name: string;
+  cityId: string;
 }
 
 // Extensive timezone database categorized by region
@@ -136,6 +143,39 @@ const App = () => {
     return saved ? saved === 'true' : true;
   });
 
+  const [people, setPeople] = useState<Person[]>(() => {
+    const saved = localStorage.getItem('zonify_people');
+    if (saved) {
+      try { return JSON.parse(saved); } catch { /* fallback */ }
+    }
+    return [];
+  });
+
+  const [openFavCities, setOpenFavCities] = useState<string[]>([]);
+  const [addingPersonTo, setAddingPersonTo] = useState<string | null>(null);
+  const [addingPersonName, setAddingPersonName] = useState('');
+
+  const addPerson = (cityId: string) => {
+    const name = addingPersonName.trim();
+    if (!name) return;
+    setPeople(prev => [...prev, { id: crypto.randomUUID(), name, cityId }]);
+    setAddingPersonName('');
+    setAddingPersonTo(null);
+  };
+
+  const removePerson = (id: string) => {
+    setPeople(prev => prev.filter(p => p.id !== id));
+  };
+
+  const getPeopleForCity = (cityId: string) => people.filter(p => p.cityId === cityId);
+  const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+
+  const toggleFavCity = (cityId: string) => {
+    setOpenFavCities(prev =>
+      prev.includes(cityId) ? prev.filter(id => id !== cityId) : [...prev, cityId]
+    );
+  };
+
   // --- UI & Application States ---
   const [currentTime, setCurrentTime] = useState(new Date());
   const [scrubbedHour, setScrubbedHour] = useState<number | null>(null);
@@ -194,6 +234,10 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('zonify_auto_theme', String(autoTheme));
   }, [autoTheme]);
+
+  useEffect(() => {
+    localStorage.setItem('zonify_people', JSON.stringify(people));
+  }, [people]);
 
   // Click outside listener to dismiss settings dropdown
   useEffect(() => {
@@ -499,7 +543,7 @@ const App = () => {
         
         {/* Dynamic Sidebar Favorites */}
         <div className="favorites-section">
-          <div className="favorites-title">FAVORITES</div>
+          <div className="favorites-title">FAVORITES ({favoriteCities.length})</div>
           {favoriteCities.length === 0 ? (
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', padding: '8px 0' }}>
               No favorites. Click the star on timezone cards to add!
@@ -507,22 +551,57 @@ const App = () => {
           ) : (
             favoriteCities.map(city => {
               const offset = getHourDifference(city.timezone, homeCity.timezone);
+              const cityPeople = getPeopleForCity(city.id);
+              const isOpen = openFavCities.includes(city.id);
               return (
-                <div 
-                  key={city.id} 
-                  className="favorite-item"
-                  onClick={() => {
-                    // Quick add/center action: bring city to focus or set as home
-                    if (!gridCities.some(c => c.id === city.id)) {
-                      setGridCities(prev => [city, ...prev]);
-                    }
-                  }}
-                >
-                  <span className="favorite-name">{city.name}</span>
-                  <span className="favorite-time">
-                    {formatTime(activeDate, city.timezone)} 
-                    <span className="badge">{formatOffsetLabel(offset)}</span>
-                  </span>
+                <div key={city.id} className="fav-group">
+                  <div 
+                    className="fav-group-header"
+                    onClick={() => toggleFavCity(city.id)}
+                  >
+                    <div className="fav-group-name">
+                      <ChevronDown size={12} className={`chevron ${isOpen ? 'open' : ''}`} />
+                      <span>{city.name}</span>
+                      {cityPeople.length > 0 && <span className="badge">{cityPeople.length}</span>}
+                    </div>
+                    <div className="fav-group-time">
+                      {formatTime(activeDate, city.timezone)}
+                      <span className="badge">{formatOffsetLabel(offset)}</span>
+                    </div>
+                  </div>
+                  {isOpen && (
+                    <div className="fav-group-body">
+                      {cityPeople.map(person => (
+                        <div key={person.id} className="fav-person-item">
+                          <div className="person-avatar">{getInitials(person.name)}</div>
+                          <span className="fav-person-name">{person.name}</span>
+                          <button className="person-item-remove" onClick={() => removePerson(person.id)}>
+                            <X size={12} />
+                          </button>
+                        </div>
+                      ))}
+                      {addingPersonTo === city.id ? (
+                        <div className="add-person-inline">
+                          <input
+                            type="text"
+                            className="person-input-small"
+                            placeholder="Name..."
+                            value={addingPersonName}
+                            onChange={e => setAddingPersonName(e.target.value)}
+                            onKeyDown={e => { if (e.key === 'Enter') addPerson(city.id); if (e.key === 'Escape') { setAddingPersonTo(null); setAddingPersonName(''); } }}
+                            autoFocus
+                          />
+                          <button className="btn-icon-small" onClick={() => addPerson(city.id)}>
+                            <Check size={12} />
+                          </button>
+                        </div>
+                      ) : (
+                        <button className="btn-add-person-fav" onClick={() => setAddingPersonTo(city.id)}>
+                          <Plus size={12} /> Add person
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })
@@ -663,6 +742,19 @@ const App = () => {
                     <span className="badge" style={{ marginRight: '6px' }}>{formatOffsetLabel(hourOffset)}</span>
                     {getTimezoneAbbreviation(activeDate, city.timezone)} • {formatDate(activeDate, city.timezone)}
                   </p>
+                  {getPeopleForCity(city.id).length > 0 && (
+                    <div className="card-people">
+                      {getPeopleForCity(city.id).map(person => (
+                        <div key={person.id} className="card-person" title={person.name}>
+                          <div className="person-avatar small">{getInitials(person.name)}</div>
+                          <span className="card-person-name">{person.name}</span>
+                          <button className="card-person-remove" onClick={() => removePerson(person.id)}>
+                            <X size={10} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             );
