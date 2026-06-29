@@ -72,7 +72,7 @@ body {
   color: var(--text-primary);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 /* App Layout */
@@ -1120,5 +1120,13 @@ input:checked + .slider:before {
   }
   .city-item > div:last-child {
     justify-content: flex-end;
+  }
+  .settings-dropdown {
+    position: fixed;
+    top: 155px;
+    right: 20px;
+    width: calc(100% - 40px);
+    max-width: 260px;
+    z-index: 1000;
   }
 }
