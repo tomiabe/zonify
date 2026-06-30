@@ -1086,6 +1086,8 @@ input:checked + .slider:before {
     padding: 170px 20px 24px;
     gap: 24px;
     position: static;
+    overflow-y: visible;
+    height: auto;
   }
   .sidebar-header {
     position: fixed;
@@ -1132,7 +1134,7 @@ input:checked + .slider:before {
   }
   .settings-dropdown {
     position: fixed;
-    top: 155px;
+    top: 74px;
     right: 20px;
     width: calc(100% - 40px);
     max-width: 260px;

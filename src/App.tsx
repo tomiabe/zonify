@@ -244,6 +244,7 @@ const App = () => {
   const [modalSearchQuery, setModalSearchQuery] = useState('');
 
   const settingsRef = useRef<HTMLDivElement>(null);
+  const mobileSettingsBtnRef = useRef<HTMLButtonElement>(null);
 
   // Sync theme class to document body
   useEffect(() => {
@@ -298,7 +299,10 @@ const App = () => {
   // Click outside listener to dismiss settings dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
+      if (
+        settingsRef.current && !settingsRef.current.contains(event.target as Node) &&
+        mobileSettingsBtnRef.current && !mobileSettingsBtnRef.current.contains(event.target as Node)
+      ) {
         setIsSettingsOpen(false);
       }
     };
@@ -497,8 +501,9 @@ const App = () => {
               >
                 {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
               </button>
-              <button 
-                className="btn-icon" 
+              <button
+                ref={mobileSettingsBtnRef}
+                className="btn-icon"
                 onClick={() => setIsSettingsOpen(prev => !prev)}
                 title="Configuration Settings"
               >
