@@ -154,7 +154,7 @@ const DEFAULT_GRID_IDS = ['nyc', 'london', 'tokyo', 'dubai', 'sydney', 'sao-paul
 const DEFAULT_FAVORITE_IDS = ['london', 'tokyo', 'dubai', 'sydney'];
 
 const App = () => {
-  const [activeView, setActiveView] = useState<'clock' | 'people' | 'plan' | 'proposal'>('plan');
+  const [activeView, setActiveView] = useState<'clock' | 'people' | 'plan' | 'proposal'>('clock');
   // --- Persistent States (local storage) ---
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const saved = localStorage.getItem('zonify_theme');
