@@ -12,10 +12,13 @@ import {
   Star, 
   RefreshCw, 
   Check,
-  ChevronDown
+  ChevronDown,
+  Users,
+  CalendarDays
 } from 'lucide-react';
+import PlanningWorkspace from './PlanningWorkspace';
 
-interface City {
+export interface City {
   id: string;
   name: string;
   country: string;
@@ -23,10 +26,12 @@ interface City {
   timezone: string;
 }
 
-interface Person {
+export interface Person {
   id: string;
   name: string;
   cityId: string;
+  workStart?: string;
+  workEnd?: string;
 }
 
 // Extensive timezone database categorized by region
@@ -147,6 +152,7 @@ const DEFAULT_GRID_IDS = ['nyc', 'london', 'tokyo', 'dubai', 'sydney', 'sao-paul
 const DEFAULT_FAVORITE_IDS = ['london', 'tokyo', 'dubai', 'sydney'];
 
 const App = () => {
+  const [activeView, setActiveView] = useState<'clock' | 'people' | 'plan' | 'proposal'>('clock');
   // --- Persistent States (local storage) ---
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const saved = localStorage.getItem('zonify_theme');
@@ -163,12 +169,15 @@ const App = () => {
     return saved ? saved === 'true' : false;
   });
 
+  const [homeWorkStart, setHomeWorkStart] = useState(() => localStorage.getItem('zonify_home_work_start') || '09:00');
+  const [homeWorkEnd, setHomeWorkEnd] = useState(() => localStorage.getItem('zonify_home_work_end') || '17:00');
+
   const [homeCity, setHomeCity] = useState<City>(() => {
     const saved = localStorage.getItem('zonify_home');
     if (saved) {
       try {
         return JSON.parse(saved);
-      } catch (e) { /* fallback */ }
+      } catch { /* fallback */ }
     }
     return CITY_DATABASE.find(c => c.id === 'sfo') || CITY_DATABASE[0];
   });
@@ -179,7 +188,7 @@ const App = () => {
       try {
         const parsedIds = JSON.parse(saved) as string[];
         return parsedIds.map(id => CITY_DATABASE.find(c => c.id === id)).filter(Boolean) as City[];
-      } catch (e) { /* fallback */ }
+      } catch { /* fallback */ }
     }
     return DEFAULT_GRID_IDS.map(id => CITY_DATABASE.find(c => c.id === id)).filter(Boolean) as City[];
   });
@@ -189,7 +198,7 @@ const App = () => {
     if (saved) {
       try {
         return JSON.parse(saved) as string[];
-      } catch (e) { /* fallback */ }
+      } catch { /* fallback */ }
     }
     return DEFAULT_FAVORITE_IDS;
   });
@@ -223,6 +232,12 @@ const App = () => {
     setPeople(prev => prev.filter(p => p.id !== id));
   };
 
+  const saveWorkspacePerson = (person: Person) => {
+    setPeople(prev => prev.some(item => item.id === person.id)
+      ? prev.map(item => item.id === person.id ? person : item)
+      : [...prev, person]);
+  };
+
   const getPeopleForCity = (cityId: string) => people.filter(p => p.cityId === cityId);
   const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
@@ -245,27 +260,18 @@ const App = () => {
 
   const settingsRef = useRef<HTMLDivElement>(null);
   const mobileSettingsBtnRef = useRef<HTMLButtonElement>(null);
+  const mobileSettingsSheetRef = useRef<HTMLElement>(null);
+
+  const homeHour = Number(new Intl.DateTimeFormat('en-US', {
+    timeZone: homeCity.timezone, hour: 'numeric', hourCycle: 'h23',
+  }).format(currentTime));
+  const resolvedTheme = autoTheme ? (homeHour >= 6 && homeHour < 18 ? 'light' : 'dark') : theme;
 
   // Sync theme class to document body
   useEffect(() => {
-    document.body.className = theme === 'light' ? 'light-theme' : '';
+    document.body.className = resolvedTheme === 'light' ? 'light-theme' : '';
     localStorage.setItem('zonify_theme', theme);
-  }, [theme]);
-
-  // Auto-theme: switch based on home city time of day (light 6a-6p, dark 6p-6a)
-  useEffect(() => {
-    if (!autoTheme) return;
-    const homeHour = parseInt(
-      new Intl.DateTimeFormat('en-US', {
-        timeZone: homeCity.timezone,
-        hour: 'numeric',
-        hour12: false,
-      }).format(currentTime),
-      10
-    );
-    const computedTheme = homeHour >= 6 && homeHour < 18 ? 'light' : 'dark';
-    setTheme(computedTheme);
-  }, [currentTime, homeCity, autoTheme]);
+  }, [theme, resolvedTheme]);
 
   // Persistent stores sync
   useEffect(() => {
@@ -275,6 +281,11 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('zonify_seconds', String(showSeconds));
   }, [showSeconds]);
+
+  useEffect(() => {
+    localStorage.setItem('zonify_home_work_start', homeWorkStart);
+    localStorage.setItem('zonify_home_work_end', homeWorkEnd);
+  }, [homeWorkStart, homeWorkEnd]);
 
   useEffect(() => {
     localStorage.setItem('zonify_home', JSON.stringify(homeCity));
@@ -299,12 +310,10 @@ const App = () => {
   // Click outside listener to dismiss settings dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        settingsRef.current && !settingsRef.current.contains(event.target as Node) &&
-        mobileSettingsBtnRef.current && !mobileSettingsBtnRef.current.contains(event.target as Node)
-      ) {
-        setIsSettingsOpen(false);
-      }
+      const target = event.target as Node;
+      const inside = [settingsRef, mobileSettingsBtnRef, mobileSettingsSheetRef]
+        .some(ref => ref.current?.contains(target));
+      if (!inside) setIsSettingsOpen(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -356,7 +365,7 @@ const App = () => {
       
       const diffMs = targetDate.getTime() - baseDate.getTime();
       return Math.round(diffMs / 3600000);
-    } catch (e) {
+    } catch {
       return 0;
     }
   };
@@ -392,7 +401,7 @@ const App = () => {
         timeZoneName: 'short'
       }).formatToParts(date);
       return parts.find(p => p.type === 'timeZoneName')?.value || '';
-    } catch (e) {
+    } catch {
       return '';
     }
   };
@@ -463,6 +472,8 @@ const App = () => {
     setFavorites(DEFAULT_FAVORITE_IDS);
     setHomeCity(CITY_DATABASE.find(c => c.id === 'sfo') || CITY_DATABASE[0]);
     setAutoTheme(true);
+    setHomeWorkStart('09:00');
+    setHomeWorkEnd('17:00');
     setScrubbedHour(null);
     setIsSettingsOpen(false);
   };
@@ -478,7 +489,7 @@ const App = () => {
   );
 
   return (
-    <div className="app-container">
+    <div className={`app-container ${activeView !== 'clock' ? 'workspace-mode' : ''}`}>
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-header">
@@ -495,11 +506,11 @@ const App = () => {
                 className="btn-icon" 
                 onClick={() => {
                   setAutoTheme(false);
-                  setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+                  setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
                 }}
-                title={autoTheme ? `Auto (${theme === 'dark' ? 'Dark' : 'Light'})` : theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}
+                title={autoTheme ? `Auto (${resolvedTheme === 'dark' ? 'Dark' : 'Light'})` : resolvedTheme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}
               >
-                {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                {resolvedTheme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
               </button>
               <button
                 ref={mobileSettingsBtnRef}
@@ -523,6 +534,13 @@ const App = () => {
             />
           </div>
         </div>
+
+        <nav className="workspace-nav" aria-label="Workspace">
+          <span className="workspace-nav-title">WORKSPACE</span>
+          <button className={activeView === 'clock' ? 'active' : ''} onClick={() => setActiveView('clock')}><Clock size={17} /> World clock</button>
+          <button className={activeView === 'plan' || activeView === 'proposal' ? 'active' : ''} onClick={() => setActiveView('plan')}><CalendarDays size={17} /> Plan time</button>
+          <button className={activeView === 'people' ? 'active' : ''} onClick={() => setActiveView('people')}><Users size={17} /> People &amp; places</button>
+        </nav>
         
         {/* Local Time Card */}
         <div className="local-time-card">
@@ -604,10 +622,35 @@ const App = () => {
             })
           )}
         </div>
+        <div className="workspace-sidebar-footer">
+          <button onClick={() => { setAutoTheme(false); setTheme(resolvedTheme === 'dark' ? 'light' : 'dark'); }}>
+            {resolvedTheme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+            {resolvedTheme === 'dark' ? 'Light mode' : 'Dark mode'}
+          </button>
+        </div>
       </aside>
       
       {/* Main Content */}
       <main className="main-content">
+        {activeView === 'clock' ? <>
+        <div className="mobile-clock-screen">
+          <header className="mobile-clock-header"><h1>World Clock</h1><button className="mobile-clock-add" aria-label="Add zone" onClick={() => setIsAddModalOpen(true)}><Plus size={21} /></button></header>
+          <div className="mobile-clock-search"><Search size={17} /><input aria-label="Search cities" placeholder="Search cities..." value={searchQuery} onChange={event => setSearchQuery(event.target.value)} /></div>
+          <div className="mobile-clock-list">
+            {filteredGridCities.map(city => <article className="mobile-clock-row" key={city.id}>
+              <div><h2>{city.name}</h2><p>{city.country} · {getTimezoneAbbreviation(activeDate, city.timezone)}</p></div>
+              <strong>{formatTime(activeDate, city.timezone)}</strong><span className="badge">{formatOffsetLabel(getHourDifference(city.timezone, homeCity.timezone))}</span>
+            </article>)}
+            {filteredGridCities.length === 0 && <p className="mobile-clock-empty">No active cities match your search.</p>}
+          </div>
+          <div className="mobile-clock-local">
+            <span><MapPin size={14} /> LOCAL TIME</span>
+            <p>{homeCity.name}, {homeCity.country}</p>
+            <strong>{formatTime(activeDate, homeCity.timezone, showSeconds && scrubbedHour === null)}</strong>
+            <small>{formatDate(activeDate, homeCity.timezone)} · {getTimezoneAbbreviation(activeDate, homeCity.timezone)}</small>
+          </div>
+        </div>
+        <div className="clock-desktop-content">
         <header className="header">
           <div>
             <h1>World Clock</h1>
@@ -622,11 +665,11 @@ const App = () => {
               className="btn-icon desktop-only" 
               onClick={() => {
                 setAutoTheme(false);
-                setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+                setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
               }}
-              title={autoTheme ? `Auto (${theme === 'dark' ? 'Dark' : 'Light'})` : theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}
+              title={autoTheme ? `Auto (${resolvedTheme === 'dark' ? 'Dark' : 'Light'})` : resolvedTheme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}
             >
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+              {resolvedTheme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
 
             <div className="settings-container" ref={settingsRef}>
@@ -676,6 +719,11 @@ const App = () => {
                       />
                       <span className="slider"></span>
                     </label>
+                  </div>
+
+                  <div className="settings-home-hours">
+                    <span className="settings-label">Your working hours (Mon–Fri)</span>
+                    <div><input aria-label="Your work starts" type="time" value={homeWorkStart} onChange={event => setHomeWorkStart(event.target.value)} /><span>to</span><input aria-label="Your work ends" type="time" value={homeWorkEnd} onChange={event => setHomeWorkEnd(event.target.value)} /></div>
                   </div>
 
                   <button 
@@ -844,6 +892,19 @@ const App = () => {
             </div>
           )}
         </section>
+        </div>
+        </> : <PlanningWorkspace
+          view={activeView}
+          onViewChange={setActiveView}
+          cities={CITY_DATABASE}
+          homeCity={homeCity}
+          people={people}
+          homeWorkStart={homeWorkStart}
+          homeWorkEnd={homeWorkEnd}
+          currentTime={currentTime}
+          onSavePerson={saveWorkspacePerson}
+          onRemovePerson={removePerson}
+        />}
       </main>
 
       {/* Interactive Modal - Add Zone & Filter Regions */}
@@ -940,9 +1001,26 @@ const App = () => {
       )}
 
       {/* Floating Add Zone button (mobile) */}
-      <button className="fab" onClick={() => setIsAddModalOpen(true)} title="Add Zone">
+      {activeView === 'clock' && <button className="fab" onClick={() => setIsAddModalOpen(true)} title="Add Zone">
         <Plus size={24} />
-      </button>
+      </button>}
+      <nav className="workspace-mobile-nav" aria-label="Mobile navigation">
+        <button className={activeView === 'clock' ? 'active' : ''} onClick={() => setActiveView('clock')}><Clock size={19} />Clock</button>
+        <button className={activeView === 'plan' || activeView === 'proposal' ? 'active' : ''} onClick={() => setActiveView('plan')}><CalendarDays size={19} />Plan</button>
+        <button className={activeView === 'people' ? 'active' : ''} onClick={() => setActiveView('people')}><Users size={19} />People</button>
+        <button className={isSettingsOpen ? 'active' : ''} onClick={() => setIsSettingsOpen(previous => !previous)}><Settings size={19} />Settings</button>
+      </nav>
+      {isSettingsOpen && <div className="mobile-settings-backdrop" onClick={() => setIsSettingsOpen(false)}>
+        <section className="mobile-settings-sheet" ref={mobileSettingsSheetRef} role="dialog" aria-modal="true" aria-label="Settings" onClick={event => event.stopPropagation()}>
+          <div className="mobile-settings-heading"><h2>Settings</h2><button aria-label="Close settings" onClick={() => setIsSettingsOpen(false)}><X size={20} /></button></div>
+          <label>Light mode <input type="checkbox" checked={resolvedTheme === 'light'} onChange={() => { setAutoTheme(false); setTheme(resolvedTheme === 'dark' ? 'light' : 'dark'); }} /></label>
+          <label>Automatic theme <input type="checkbox" checked={autoTheme} onChange={event => setAutoTheme(event.target.checked)} /></label>
+          <label>24-hour format <input type="checkbox" checked={timeFormat === '24h'} onChange={event => setTimeFormat(event.target.checked ? '24h' : '12h')} /></label>
+          <label>Show seconds <input type="checkbox" checked={showSeconds} onChange={event => setShowSeconds(event.target.checked)} /></label>
+          <div className="mobile-home-hours"><span>Your working hours (Mon–Fri)</span><div><input aria-label="Your work starts" type="time" value={homeWorkStart} onChange={event => setHomeWorkStart(event.target.value)} /><span>to</span><input aria-label="Your work ends" type="time" value={homeWorkEnd} onChange={event => setHomeWorkEnd(event.target.value)} /></div></div>
+          <button className="workspace-secondary" onClick={handleResetDefaults}><RefreshCw size={15} /> Reset to defaults</button>
+        </section>
+      </div>}
     </div>
   );
 };
