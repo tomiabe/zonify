@@ -152,7 +152,7 @@ const DEFAULT_GRID_IDS = ['nyc', 'london', 'tokyo', 'dubai', 'sydney', 'sao-paul
 const DEFAULT_FAVORITE_IDS = ['london', 'tokyo', 'dubai', 'sydney'];
 
 const App = () => {
-  const [activeView, setActiveView] = useState<'clock' | 'people' | 'plan' | 'proposal'>('clock');
+  const [activeView, setActiveView] = useState<'clock' | 'people' | 'plan' | 'proposal'>('plan');
   // --- Persistent States (local storage) ---
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const saved = localStorage.getItem('zonify_theme');
@@ -179,7 +179,7 @@ const App = () => {
         return JSON.parse(saved);
       } catch { /* fallback */ }
     }
-    return CITY_DATABASE.find(c => c.id === 'sfo') || CITY_DATABASE[0];
+    return CITY_DATABASE.find(c => c.id === 'sydney') || CITY_DATABASE[0];
   });
 
   const [gridCities, setGridCities] = useState<City[]>(() => {
@@ -470,7 +470,7 @@ const App = () => {
   const handleResetDefaults = () => {
     setGridCities(DEFAULT_GRID_IDS.map(id => CITY_DATABASE.find(c => c.id === id)).filter(Boolean) as City[]);
     setFavorites(DEFAULT_FAVORITE_IDS);
-    setHomeCity(CITY_DATABASE.find(c => c.id === 'sfo') || CITY_DATABASE[0]);
+    setHomeCity(CITY_DATABASE.find(c => c.id === 'sydney') || CITY_DATABASE[0]);
     setAutoTheme(true);
     setHomeWorkStart('09:00');
     setHomeWorkEnd('17:00');

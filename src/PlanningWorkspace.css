@@ -158,7 +158,9 @@ body.light-theme .app-container {
 .participant-chip svg { color: var(--workspace-blue-text); }
 .add-participant { display: flex; align-items: center; gap: 5px; border: 1px dashed var(--workspace-line); color: var(--workspace-blue-text); background: transparent; border-radius: 9px; padding: 7px 10px; font: inherit; font-size: .77rem; cursor: pointer; }
 .duration-control { display: flex; flex-direction: column; gap: 8px; min-width: 125px; }
-.duration-control select { width: 100%; }
+.duration-select { position: relative; display: block; }
+.duration-select select { width: 100%; appearance: none; padding-right: 36px; cursor: pointer; }
+.duration-select > svg { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--workspace-heading); pointer-events: none; }
 .shared-timeline { padding: 20px; }
 .timeline-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
 .timeline-heading h2 { margin-top: 6px; }
