@@ -5,18 +5,20 @@ import {
   Clock, 
   Settings, 
   Plus, 
-  Globe, 
+  Globe,
   Sun, 
   Moon, 
   X, 
   Star, 
   RefreshCw, 
   Check,
-  ChevronDown,
   Users,
-  CalendarDays
+  CalendarDays,
+  MoreHorizontal
 } from 'lucide-react';
 import PlanningWorkspace from './PlanningWorkspace';
+import { zoneAbbreviation as getTimezoneAbbreviation } from './meeting';
+import './WorldClock.css';
 
 export interface City {
   id: string;
@@ -216,17 +218,6 @@ const App = () => {
     return [];
   });
 
-  const [openFavCities, setOpenFavCities] = useState<string[]>([]);
-  const [addingPersonTo, setAddingPersonTo] = useState<string | null>(null);
-  const [addingPersonName, setAddingPersonName] = useState('');
-
-  const addPerson = (cityId: string) => {
-    const name = addingPersonName.trim();
-    if (!name) return;
-    setPeople(prev => [...prev, { id: crypto.randomUUID(), name, cityId }]);
-    setAddingPersonName('');
-    setAddingPersonTo(null);
-  };
 
   const removePerson = (id: string) => {
     setPeople(prev => prev.filter(p => p.id !== id));
@@ -241,16 +232,13 @@ const App = () => {
   const getPeopleForCity = (cityId: string) => people.filter(p => p.cityId === cityId);
   const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
-  const toggleFavCity = (cityId: string) => {
-    setOpenFavCities(prev =>
-      prev.includes(cityId) ? prev.filter(id => id !== cityId) : [...prev, cityId]
-    );
-  };
 
   // --- UI & Application States ---
   const [currentTime, setCurrentTime] = useState(new Date());
   const [scrubbedHour, setScrubbedHour] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [openMobileCityActions, setOpenMobileCityActions] = useState<string | null>(null);
   
   // Modals & Popovers
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -259,7 +247,6 @@ const App = () => {
   const [modalSearchQuery, setModalSearchQuery] = useState('');
 
   const settingsRef = useRef<HTMLDivElement>(null);
-  const mobileSettingsBtnRef = useRef<HTMLButtonElement>(null);
   const mobileSettingsSheetRef = useRef<HTMLElement>(null);
 
   const homeHour = Number(new Intl.DateTimeFormat('en-US', {
@@ -311,7 +298,7 @@ const App = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
-      const inside = [settingsRef, mobileSettingsBtnRef, mobileSettingsSheetRef]
+      const inside = [settingsRef, mobileSettingsSheetRef]
         .some(ref => ref.current?.contains(target));
       if (!inside) setIsSettingsOpen(false);
     };
@@ -337,7 +324,7 @@ const App = () => {
     const homeHourStr = new Intl.DateTimeFormat('en-US', {
       timeZone: homeCity.timezone,
       hour: 'numeric',
-      hour12: false
+      hourCycle: 'h23'
     }).format(currentTime);
     
     const currentHomeHour = parseInt(homeHourStr, 10);
@@ -364,7 +351,7 @@ const App = () => {
       const baseDate = new Date(baseStr);
       
       const diffMs = targetDate.getTime() - baseDate.getTime();
-      return Math.round(diffMs / 3600000);
+      return Math.round(diffMs / 900000) / 4;
     } catch {
       return 0;
     }
@@ -394,20 +381,9 @@ const App = () => {
     }).format(date);
   };
 
-  const getTimezoneAbbreviation = (date: Date, timezone: string) => {
-    try {
-      const parts = new Intl.DateTimeFormat('en-US', {
-        timeZone: timezone,
-        timeZoneName: 'short'
-      }).formatToParts(date);
-      return parts.find(p => p.type === 'timeZoneName')?.value || '';
-    } catch {
-      return '';
-    }
-  };
-
   // --- Grid Filtering ---
   const filteredGridCities = gridCities.filter(city => {
+    if (showFavoritesOnly && !favorites.includes(city.id)) return false;
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
@@ -433,12 +409,6 @@ const App = () => {
     }
     return true;
   });
-
-  // --- Sidebar Favorites Filtering ---
-  // Favorites synced dynamically based on active favorites state
-  const favoriteCities = favorites
-    .map(id => CITY_DATABASE.find(c => c.id === id))
-    .filter(Boolean) as City[];
 
   // --- Core Action Handlers ---
   const toggleFavorite = (cityId: string) => {
@@ -489,7 +459,7 @@ const App = () => {
   );
 
   return (
-    <div className={`app-container ${activeView !== 'clock' ? 'workspace-mode' : ''}`}>
+    <div className={`app-container workspace-mode ${activeView === 'clock' ? 'clock-view' : ''}`}>
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-header">
@@ -512,33 +482,15 @@ const App = () => {
               >
                 {resolvedTheme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
               </button>
-              <button
-                ref={mobileSettingsBtnRef}
-                className="btn-icon"
-                onClick={() => setIsSettingsOpen(prev => !prev)}
-                title="Configuration Settings"
-              >
-                <Settings size={20} />
-              </button>
             </div>
           </div>
           
-          <div className="search-container">
-            <Search className="search-icon" size={16} />
-            <input 
-              type="text" 
-              className="search-input" 
-              placeholder="Search cities..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
         </div>
 
         <nav className="workspace-nav" aria-label="Workspace">
           <span className="workspace-nav-title">WORKSPACE</span>
-          <button className={activeView === 'clock' ? 'active' : ''} onClick={() => setActiveView('clock')}><Clock size={17} /> World clock</button>
-          <button className={activeView === 'plan' || activeView === 'proposal' ? 'active' : ''} onClick={() => setActiveView('plan')}><CalendarDays size={17} /> Plan time</button>
+          <button className={activeView === 'clock' ? 'active' : ''} onClick={() => setActiveView('clock')}><Globe size={17} /> World clock</button>
+          <button className={activeView === 'plan' || activeView === 'proposal' ? 'active' : ''} onClick={() => setActiveView('plan')}><CalendarDays size={17} /> Plan a time</button>
           <button className={activeView === 'people' ? 'active' : ''} onClick={() => setActiveView('people')}><Users size={17} /> People &amp; places</button>
         </nav>
         
@@ -556,72 +508,6 @@ const App = () => {
           </div>
         </div>
         
-        {/* Dynamic Sidebar Favorites */}
-        <div className="favorites-section">
-          <div className="favorites-title">FAVORITES ({favoriteCities.length})</div>
-          {favoriteCities.length === 0 ? (
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', padding: '8px 0' }}>
-              No favorites. Click the star on timezone cards to add!
-            </div>
-          ) : (
-            favoriteCities.map(city => {
-              const offset = getHourDifference(city.timezone, homeCity.timezone);
-              const cityPeople = getPeopleForCity(city.id);
-              const isOpen = openFavCities.includes(city.id);
-              return (
-                <div key={city.id} className="fav-group">
-                  <div 
-                    className="fav-group-header"
-                    onClick={() => toggleFavCity(city.id)}
-                  >
-                    <div className="fav-group-name">
-                      <ChevronDown size={12} className={`chevron ${isOpen ? 'open' : ''}`} />
-                      <span>{city.name}</span>
-                      {cityPeople.length > 0 && <span className="badge">{cityPeople.length}</span>}
-                    </div>
-                    <div className="fav-group-time">
-                      {formatTime(activeDate, city.timezone)}
-                      <span className="badge">{formatOffsetLabel(offset)}</span>
-                    </div>
-                  </div>
-                  {isOpen && (
-                    <div className="fav-group-body">
-                      {cityPeople.map(person => (
-                        <div key={person.id} className="fav-person-item">
-                          <div className="person-avatar">{getInitials(person.name)}</div>
-                          <span className="fav-person-name">{person.name}</span>
-                          <button className="person-item-remove" onClick={() => removePerson(person.id)}>
-                            <X size={12} />
-                          </button>
-                        </div>
-                      ))}
-                      {addingPersonTo === city.id ? (
-                        <div className="add-person-inline">
-                          <input
-                            type="text"
-                            className="person-input-small"
-                            placeholder="Name..."
-                            value={addingPersonName}
-                            onChange={e => setAddingPersonName(e.target.value)}
-                            onKeyDown={e => { if (e.key === 'Enter') addPerson(city.id); if (e.key === 'Escape') { setAddingPersonTo(null); setAddingPersonName(''); } }}
-                            autoFocus
-                          />
-                          <button className="btn-icon-small" onClick={() => addPerson(city.id)}>
-                            <Check size={12} />
-                          </button>
-                        </div>
-                      ) : (
-                        <button className="btn-add-person-fav" onClick={() => setAddingPersonTo(city.id)}>
-                          <Plus size={12} /> Add person
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })
-          )}
-        </div>
         <div className="workspace-sidebar-footer">
           <button onClick={() => { setAutoTheme(false); setTheme(resolvedTheme === 'dark' ? 'light' : 'dark'); }}>
             {resolvedTheme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
@@ -634,31 +520,36 @@ const App = () => {
       <main className="main-content">
         {activeView === 'clock' ? <>
         <div className="mobile-clock-screen">
-          <header className="mobile-clock-header"><h1>World Clock</h1><button className="mobile-clock-add" aria-label="Add zone" onClick={() => setIsAddModalOpen(true)}><Plus size={21} /></button></header>
-          <div className="mobile-clock-search"><Search size={17} /><input aria-label="Search cities" placeholder="Search cities..." value={searchQuery} onChange={event => setSearchQuery(event.target.value)} /></div>
+          <header className="mobile-clock-header"><div><h1>World clock</h1><p>Compare your saved cities.</p></div><button className="mobile-clock-add" aria-label="Add city" onClick={() => setIsAddModalOpen(true)}><Plus size={21} /></button></header>
+          <div className="mobile-clock-search"><Search size={17} /><input aria-label="Search saved cities" placeholder="Search cities" value={searchQuery} onChange={event => setSearchQuery(event.target.value)} /></div>
+          <section className="mobile-clock-timeline workspace-panel" aria-label="Compare hour">
+            <div className="clock-timeline-heading"><span><Clock size={16} /> Compare hour</span>{scrubbedHour === null ? <small>• Live</small> : <button onClick={() => setScrubbedHour(null)}><RefreshCw size={13} /> Back to live</button>}</div>
+            <div className="mobile-clock-bars">{Array.from({ length: 24 }, (_, hour) => <button key={hour} type="button" className={hour === (scrubbedHour ?? currentHomeHourIndex) ? 'selected' : hour * 60 < Number(homeWorkEnd.slice(0, 2)) * 60 + Number(homeWorkEnd.slice(3)) && (hour + 1) * 60 > Number(homeWorkStart.slice(0, 2)) * 60 + Number(homeWorkStart.slice(3)) ? 'working' : ''} aria-label={hour + ':00 in ' + homeCity.name} aria-pressed={scrubbedHour === hour} onClick={() => setScrubbedHour(scrubbedHour === hour ? null : hour)} />)}</div>
+            <div className="mobile-clock-labels"><span>12 AM</span><span>6 AM</span><span>12 PM</span><span>6 PM</span><span>12 AM</span></div>
+            {scrubbedHour !== null && <p className="clock-time-travel-note">Showing {scrubbedHour === 0 ? '12 AM' : scrubbedHour === 12 ? '12 PM' : scrubbedHour > 12 ? (scrubbedHour - 12) + ' PM' : scrubbedHour + ' AM'} in {homeCity.name}</p>}
+          </section>
+          <div className="clock-section-heading"><h2>Saved cities</h2><div className="clock-heading-actions"><span>{filteredGridCities.length} {filteredGridCities.length === 1 ? 'city' : 'cities'}</span><button className={showFavoritesOnly ? 'clock-favorites-filter active' : 'clock-favorites-filter'} aria-pressed={showFavoritesOnly} onClick={() => setShowFavoritesOnly(previous => !previous)}><Star size={14} /> Favorites</button></div></div>
           <div className="mobile-clock-list">
-            {filteredGridCities.map(city => <article className="mobile-clock-row" key={city.id}>
-              <div><h2>{city.name}</h2><p>{city.country} · {getTimezoneAbbreviation(activeDate, city.timezone)}</p></div>
-              <strong>{formatTime(activeDate, city.timezone)}</strong><span className="badge">{formatOffsetLabel(getHourDifference(city.timezone, homeCity.timezone))}</span>
+            {[...filteredGridCities].sort((a, b) => Number(b.id === homeCity.id) - Number(a.id === homeCity.id)).map(city => <article className="mobile-clock-row" key={city.id}>
+              <div className="mobile-clock-city"><h3>{city.name} <span>{homeCity.id === city.id ? 'Home' : formatOffsetLabel(getHourDifference(city.timezone, homeCity.timezone))}</span></h3><p>{city.country}</p></div>
+              <div className="mobile-clock-time"><strong>{formatTime(activeDate, city.timezone)}</strong><small>{formatDate(activeDate, city.timezone)} · {getTimezoneAbbreviation(activeDate, city.timezone)}</small></div>
+              <button className={favorites.includes(city.id) ? 'mobile-clock-favorite active' : 'mobile-clock-favorite'} aria-label={favorites.includes(city.id) ? 'Remove ' + city.name + ' from favorites' : 'Add ' + city.name + ' to favorites'} onClick={() => toggleFavorite(city.id)}><Star size={16} fill={favorites.includes(city.id) ? 'currentColor' : 'none'} /></button>
+              <button className="mobile-clock-more" aria-label={'More actions for ' + city.name} aria-expanded={openMobileCityActions === city.id} onClick={() => setOpenMobileCityActions(openMobileCityActions === city.id ? null : city.id)}><MoreHorizontal size={18} /></button>
+              {openMobileCityActions === city.id && <div className="mobile-clock-actions"><button onClick={() => { handleSetHomeCity(city); setOpenMobileCityActions(null); }}><MapPin size={14} /> Set as home</button><button onClick={() => { handleAddCityToGrid(city); setOpenMobileCityActions(null); }}><X size={14} /> Remove city</button></div>}
+              {getPeopleForCity(city.id).length > 0 && <div className="mobile-clock-people">{getPeopleForCity(city.id).map(person => <span key={person.id}>{getInitials(person.name)} · {person.name}</span>)}</div>}
             </article>)}
-            {filteredGridCities.length === 0 && <p className="mobile-clock-empty">No active cities match your search.</p>}
-          </div>
-          <div className="mobile-clock-local">
-            <span><MapPin size={14} /> LOCAL TIME</span>
-            <p>{homeCity.name}, {homeCity.country}</p>
-            <strong>{formatTime(activeDate, homeCity.timezone, showSeconds && scrubbedHour === null)}</strong>
-            <small>{formatDate(activeDate, homeCity.timezone)} · {getTimezoneAbbreviation(activeDate, homeCity.timezone)}</small>
+            {filteredGridCities.length === 0 && <p className="mobile-clock-empty">{showFavoritesOnly ? 'No favorites match. Star a city or show all cities.' : 'No saved cities match your search. Try another name or add a city.'}</p>}
           </div>
         </div>
         <div className="clock-desktop-content">
         <header className="header">
           <div>
-            <h1>World Clock</h1>
-            <p>Compare times across {gridCities.length} active zones</p>
+            <h1>World clock</h1>
+            <p>Compare local times across your saved cities.</p>
           </div>
           <div className="actions">
             <button className="btn-primary desktop-only" onClick={() => setIsAddModalOpen(true)}>
-              <Plus size={16} /> Add Zone
+              <Plus size={16} /> Add city
             </button>
 
             <button 
@@ -683,7 +574,7 @@ const App = () => {
               
               {isSettingsOpen && (
                 <div className="settings-dropdown">
-                  <div className="settings-title">SETTINGS</div>
+                  <div className="settings-title">Settings</div>
                   
                   <div className="settings-option">
                     <span className="settings-label">24-Hour Format</span>
@@ -710,7 +601,7 @@ const App = () => {
                   </div>
 
                   <div className="settings-option">
-                    <span className="settings-label">Auto Theme (follows sun)</span>
+                    <span className="settings-label">Automatic theme</span>
                     <label className="toggle-switch">
                       <input 
                         type="checkbox" 
@@ -722,7 +613,7 @@ const App = () => {
                   </div>
 
                   <div className="settings-home-hours">
-                    <span className="settings-label">Your working hours (Mon–Fri)</span>
+                    <span className="settings-label">Your working hours · Mon–Fri</span>
                     <div><input aria-label="Your work starts" type="time" value={homeWorkStart} onChange={event => setHomeWorkStart(event.target.value)} /><span>to</span><input aria-label="Your work ends" type="time" value={homeWorkEnd} onChange={event => setHomeWorkEnd(event.target.value)} /></div>
                   </div>
 
@@ -748,45 +639,40 @@ const App = () => {
             </div>
           </div>
         </header>
+        <div className="clock-toolbar">
+          <div className="clock-search"><Search size={16} /><input aria-label="Search saved cities" placeholder="Search saved cities" value={searchQuery} onChange={event => setSearchQuery(event.target.value)} /></div>
+          <div className="clock-heading-actions"><span>{searchQuery.trim() ? `${filteredGridCities.length} matching cities` : `${filteredGridCities.length} cities · ${gridCities.filter(city => favorites.includes(city.id)).length} favorites`}</span><button className={showFavoritesOnly ? 'clock-favorites-filter active' : 'clock-favorites-filter'} aria-pressed={showFavoritesOnly} onClick={() => setShowFavoritesOnly(previous => !previous)}><Star size={14} /> Favorites</button></div>
+        </div>
 
         {/* Timeline Scrubbing Time Travel Section */}
         <section className="timeline-section">
-          <div className="timeline-header" style={{ justifyContent: 'space-between', display: 'flex', width: '100%' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Globe size={16} /> 24-Hour Timeline (Base: {homeCity.name})
-            </span>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              Click bars to travel in time
-            </span>
+          <div className="timeline-header">
+            <div><strong><Clock size={16} /> Compare another hour</strong><p>Choose an hour in {homeCity.name} to preview each city’s local time.</p></div>
+            {scrubbedHour === null ? <span className="clock-live-status">• Live now</span> : <button className="clock-live-status" onClick={() => setScrubbedHour(null)}><RefreshCw size={13} /> Back to live</button>}
           </div>
 
           <div className="timeline-graph-container">
             <div className="timeline-graph">
               {[...Array(24)].map((_, i) => {
-                const isActive = i >= 8 && i <= 17; // Business overlap 8 AM - 5 PM
-                const isLightActive = i >= 10 && i <= 15; // Golden hours overlap 10 AM - 3 PM
+                const startMinutes = Number(homeWorkStart.slice(0, 2)) * 60 + Number(homeWorkStart.slice(3));
+                const endMinutes = Number(homeWorkEnd.slice(0, 2)) * 60 + Number(homeWorkEnd.slice(3));
+                const isActive = i * 60 < endMinutes && (i + 1) * 60 > startMinutes;
                 const isCurrentHour = i === currentHomeHourIndex;
                 const isSelected = i === scrubbedHour;
                 
-                let height = '30%';
-                if (isActive) height = '70%';
-                if (isLightActive) height = '100%';
-                if (i === 8 || i === 17) height = '50%';
-                
                 let barClass = 'timeline-bar';
                 if (isActive) barClass += ' active';
-                if (isLightActive) barClass += ' active-light';
                 if (isSelected) barClass += ' scrubbed-target';
 
                 return (
-                  <div 
+                  <button
+                    type="button"
                     key={i} 
                     className={barClass}
-                    style={{ 
-                      height,
-                      border: isCurrentHour ? '2px solid var(--accent-blue)' : undefined,
-                    }}
+                    style={{ border: isCurrentHour && scrubbedHour === null ? '2px solid var(--workspace-blue)' : undefined }}
                     onClick={() => setScrubbedHour(i === scrubbedHour ? null : i)}
+                    aria-label={i + ':00 in ' + homeCity.name}
+                    aria-pressed={isSelected}
                     title={`${i === 0 ? '12 AM' : i === 12 ? '12 PM' : i > 12 ? `${i - 12} PM` : `${i} AM`} in ${homeCity.name} ${isCurrentHour ? '(Current Hour)' : ''}`}
                   />
                 );
@@ -809,14 +695,15 @@ const App = () => {
         {scrubbedHour !== null && (
           <div className="timeline-status-banner">
             <span>
-              🕰️ <strong>Time Travel Mode</strong>: Showing times for <strong>{scrubbedHour === 0 ? '12 AM' : scrubbedHour === 12 ? '12 PM' : scrubbedHour > 12 ? `${scrubbedHour - 12} PM` : `${scrubbedHour} AM`}</strong> (Home)
+              <Clock size={14} /> Showing <strong>{scrubbedHour === 0 ? '12 AM' : scrubbedHour === 12 ? '12 PM' : scrubbedHour > 12 ? `${scrubbedHour - 12} PM` : `${scrubbedHour} AM`}</strong> in {homeCity.name} across your saved cities
             </span>
             <button className="btn-reset-time" onClick={() => setScrubbedHour(null)}>
-              Reset to Live Time
+              Back to live
             </button>
           </div>
         )}
         
+        <div className="clock-section-heading"><h2>Saved cities</h2><span>Star a favorite, set your home city, or remove a card</span></div>
         {/* Responsive Zones Grid */}
         <section className="zones-grid">
           {filteredGridCities.map(city => {
@@ -831,6 +718,7 @@ const App = () => {
                     <h3>{city.name}</h3>
                     <p>{city.country}</p>
                   </div>
+                  <span className="zone-offset">{isHome ? 'Home' : formatOffsetLabel(hourOffset)}</span>
                   
                   <div className="zone-card-actions">
                     {/* Make Favorite */}
@@ -865,8 +753,7 @@ const App = () => {
                 <div className="zone-time">
                   <h1>{formatTime(activeDate, city.timezone)}</h1>
                   <p>
-                    <span className="badge" style={{ marginRight: '6px' }}>{formatOffsetLabel(hourOffset)}</span>
-                    {getTimezoneAbbreviation(activeDate, city.timezone)} • {formatDate(activeDate, city.timezone)}
+                    {formatDate(activeDate, city.timezone)} · {getTimezoneAbbreviation(activeDate, city.timezone)}
                   </p>
                   {getPeopleForCity(city.id).length > 0 && (
                     <div className="card-people">
@@ -887,8 +774,12 @@ const App = () => {
           })}
 
           {filteredGridCities.length === 0 && (
-            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '48px', color: 'var(--text-secondary)' }}>
-              No active timezone cards match your filter. Click <strong>Add Zone</strong> or clear your search query.
+            <div className="clock-empty workspace-panel">
+              <Search size={24} />
+              <h3>{showFavoritesOnly ? 'No favorites found' : 'No saved cities found'}</h3>
+              <p>{showFavoritesOnly ? 'Star a saved city or turn off the favorites filter.' : 'Try another search or add a city to your world clock.'}</p>
+              {showFavoritesOnly && <button className="workspace-secondary" onClick={() => setShowFavoritesOnly(false)}>Show all cities</button>}
+              <button className="workspace-primary" onClick={() => setIsAddModalOpen(true)}><Plus size={16} /> Add city</button>
             </div>
           )}
         </section>
@@ -912,8 +803,8 @@ const App = () => {
         <div className="modal-overlay" onClick={() => setIsAddModalOpen(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Add World Timezone</h2>
-              <button className="btn-close" onClick={() => setIsAddModalOpen(false)}>
+              <h2>Add a city</h2>
+              <button className="btn-close" aria-label="Close add city" onClick={() => setIsAddModalOpen(false)}>
                 <X size={20} />
               </button>
             </div>
@@ -950,42 +841,34 @@ const App = () => {
                   const isAlreadyAdded = gridCities.some(c => c.id === city.id);
                   
                   return (
-                    <div 
+                    <button
+                      type="button"
                       key={city.id} 
                       className="city-item"
                       onClick={() => handleAddCityToGrid(city)}
+                      aria-pressed={isAlreadyAdded}
                     >
                       <div className="city-item-info">
                         <h4>{city.name}</h4>
                         <p>{city.country} • {city.region}</p>
                       </div>
                       
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div className="city-item-controls">
                         <span className="city-item-timezone">
                           {getTimezoneAbbreviation(currentTime, city.timezone)}
                         </span>
                         
-                        <button 
-                          className="btn-primary"
-                          style={{
-                            padding: '6px 12px',
-                            fontSize: '0.78rem',
-                            backgroundColor: isAlreadyAdded ? 'rgba(59, 130, 246, 0.1)' : undefined,
-                            color: isAlreadyAdded ? 'var(--accent-blue)' : undefined,
-                            border: isAlreadyAdded ? '1px solid var(--accent-blue)' : 'none',
-                            boxShadow: isAlreadyAdded ? 'none' : undefined
-                          }}
-                        >
+                        <span className={isAlreadyAdded ? 'city-item-action added' : 'city-item-action'}>
                           {isAlreadyAdded ? (
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <Check size={12} /> Active
+                            <span className="city-item-added-label">
+                              <Check size={12} /> Added
                             </span>
                           ) : (
-                            'Add Card'
+                            <><Plus size={12} /> Add</>
                           )}
-                        </button>
+                        </span>
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
 
@@ -1000,10 +883,6 @@ const App = () => {
         </div>
       )}
 
-      {/* Floating Add Zone button (mobile) */}
-      {activeView === 'clock' && <button className="fab" onClick={() => setIsAddModalOpen(true)} title="Add Zone">
-        <Plus size={24} />
-      </button>}
       <nav className="workspace-mobile-nav" aria-label="Mobile navigation">
         <button className={activeView === 'clock' ? 'active' : ''} onClick={() => setActiveView('clock')}><Clock size={19} />Clock</button>
         <button className={activeView === 'plan' || activeView === 'proposal' ? 'active' : ''} onClick={() => setActiveView('plan')}><CalendarDays size={19} />Plan</button>

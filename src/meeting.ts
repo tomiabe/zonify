@@ -71,9 +71,36 @@ export function findMeetingWindows(dateKey: string, baseTimezone: string, people
 }
 
 export function formatZoneTime(date: Date, timezone: string) {
-  return new Intl.DateTimeFormat('en-US', {
-    timeZone: timezone, hour: 'numeric', minute: '2-digit', timeZoneName: 'short',
+  const clock = new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone, hour: 'numeric', minute: '2-digit',
   }).format(date);
+  const abbreviation = zoneAbbreviation(date, timezone);
+  return abbreviation ? `${clock} ${abbreviation}` : clock;
+}
+
+export function zoneAbbreviation(date: Date, timezone: string) {
+  const locale = timezone.startsWith('Australia/') ? 'en-AU'
+    : timezone === 'Pacific/Auckland' ? 'en-NZ'
+      : timezone === 'Asia/Tokyo' ? 'ja-JP'
+        : timezone === 'Asia/Dubai' ? 'en-AE'
+          : timezone === 'America/Sao_Paulo' ? 'pt-BR'
+            : timezone === 'Europe/London' ? 'en-GB'
+              : 'en-US';
+  return new Intl.DateTimeFormat(locale, { timeZone: timezone, timeZoneName: 'short' })
+    .formatToParts(date).find(part => part.type === 'timeZoneName')?.value ?? '';
+}
+
+export function formatZoneTimeRange(start: Date, minutes: number, timezone: string) {
+  const end = new Date(start.getTime() + minutes * 60_000);
+  const startTime = formatZoneTime(start, timezone);
+  const endTime = formatZoneTime(end, timezone);
+  const startClock = startTime.slice(0, startTime.lastIndexOf(' '));
+  const endClock = endTime.slice(0, endTime.lastIndexOf(' '));
+  const zone = endTime.slice(endTime.lastIndexOf(' ') + 1);
+  const startPeriod = startClock.match(/ (AM|PM)$/)?.[1];
+  const endPeriod = endClock.match(/ (AM|PM)$/)?.[1];
+  const compactStart = startPeriod === endPeriod ? startClock.replace(/ (AM|PM)$/, '') : startClock;
+  return `${compactStart}–${endClock} ${zone}`;
 }
 
 export function formatZoneDate(date: Date, timezone: string) {

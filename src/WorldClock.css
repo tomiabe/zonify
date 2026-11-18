@@ -1,0 +1,630 @@
+.clock-view .main-content {
+  padding: 32px;
+}
+
+.clock-view .modal-overlay { backdrop-filter: none; }
+
+.clock-desktop-content {
+  width: min(100%, 1200px);
+  margin: 0 auto;
+  gap: 20px;
+}
+
+.clock-view .header h1 {
+  color: var(--workspace-heading);
+  font-size: clamp(1.7rem, 2.5vw, 2.25rem);
+  letter-spacing: -.035em;
+  margin: 0 0 6px;
+}
+
+.clock-view .header p,
+.clock-toolbar > span,
+.clock-section-heading > span {
+  color: var(--workspace-muted);
+  font-size: .78rem;
+}
+
+.clock-view .actions > .btn-icon {
+  display: none;
+}
+
+.clock-view .btn-primary {
+  background: var(--workspace-blue);
+  border: 1px solid var(--workspace-blue);
+  border-radius: 10px;
+  padding: 11px 17px;
+  box-shadow: none;
+  font-weight: 650;
+}
+
+.clock-view .btn-primary:hover {
+  filter: brightness(1.1);
+  transform: none;
+  box-shadow: none;
+}
+
+.clock-view .btn-icon {
+  background: var(--workspace-input);
+  border: 1px solid var(--workspace-line);
+  border-radius: 10px;
+  color: var(--workspace-heading);
+}
+
+.clock-toolbar,
+.clock-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.clock-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--workspace-muted);
+  font-size: .75rem;
+}
+
+.clock-favorites-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--workspace-line);
+  border-radius: 8px;
+  background: var(--workspace-input);
+  color: var(--workspace-muted);
+  padding: 7px 9px;
+  font: inherit;
+  font-size: .73rem;
+  cursor: pointer;
+}
+
+.clock-favorites-filter.active,
+.clock-favorites-filter:hover {
+  border-color: var(--workspace-blue-surface);
+  background: var(--workspace-blue-surface);
+  color: var(--workspace-blue-text);
+}
+
+.clock-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 280px;
+  min-width: 0;
+  border: 1px solid var(--workspace-line);
+  border-radius: 10px;
+  background: var(--workspace-input);
+  padding: 0 12px;
+  color: var(--workspace-muted);
+}
+
+.clock-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  padding: 10px 0;
+  color: var(--workspace-heading);
+  font: inherit;
+  font-size: .82rem;
+}
+
+.clock-search input::placeholder,
+.mobile-clock-search input::placeholder {
+  color: var(--workspace-muted);
+}
+
+.clock-view .timeline-section {
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid var(--workspace-line);
+  background: var(--workspace-surface);
+  box-shadow: none;
+}
+
+.clock-view .timeline-header {
+  width: 100%;
+  justify-content: space-between;
+  align-items: flex-start;
+  color: var(--workspace-heading);
+}
+
+.clock-view .timeline-header strong,
+.clock-timeline-heading > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: .82rem;
+  font-weight: 650;
+}
+
+.clock-view .timeline-header p {
+  margin-top: 4px;
+  color: var(--workspace-muted);
+  font-size: .72rem;
+}
+
+.clock-live-status,
+.clock-timeline-heading small,
+.clock-timeline-heading button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: none;
+  color: var(--workspace-blue-text);
+  font: inherit;
+  font-size: .72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+button.clock-live-status,
+.clock-timeline-heading button {
+  cursor: pointer;
+}
+
+.clock-view .timeline-graph {
+  height: 20px;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+}
+
+.clock-view .timeline-bar {
+  height: 10px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: var(--workspace-input);
+  cursor: pointer;
+}
+
+.clock-view .timeline-bar.active,
+.clock-view .timeline-bar.active-light {
+  background: var(--workspace-blue-surface);
+  box-shadow: none;
+}
+
+.clock-view .timeline-bar:hover,
+.clock-view .timeline-bar.scrubbed-target {
+  background: var(--workspace-blue) !important;
+  box-shadow: none !important;
+}
+
+.clock-view .timeline-labels {
+  color: var(--workspace-muted);
+  font-family: inherit;
+}
+
+.clock-view .timeline-status-banner {
+  margin: -4px 0 0;
+  padding: 10px 14px;
+  background: var(--workspace-blue-surface);
+  border: 1px solid var(--workspace-line);
+  color: var(--workspace-heading);
+  animation: none;
+}
+
+.clock-view .timeline-status-banner > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.clock-view .btn-reset-time {
+  background: none;
+  color: var(--workspace-blue-text);
+  font: inherit;
+  font-size: .75rem;
+}
+
+.clock-section-heading h2 {
+  color: var(--workspace-heading);
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.clock-view .zones-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.clock-view .zone-card {
+  min-height: 166px;
+  gap: 0;
+  padding: 20px;
+  background: var(--workspace-surface);
+  border-color: var(--workspace-line);
+  box-shadow: none;
+}
+
+.clock-view .zone-card::after {
+  display: none;
+}
+
+.clock-view .zone-card:hover {
+  transform: none;
+  border-color: var(--workspace-blue);
+  box-shadow: none;
+}
+
+.clock-view .zone-name h3 {
+  margin: 0 0 4px;
+  color: var(--workspace-heading);
+  font-size: .88rem;
+}
+
+.clock-view .zone-name p,
+.clock-view .zone-time p {
+  color: var(--workspace-muted);
+  font-size: .72rem;
+}
+
+.zone-offset {
+  align-self: flex-start;
+  flex-shrink: 0;
+  background: var(--workspace-blue-surface);
+  color: var(--workspace-blue-text);
+  border-radius: 6px;
+  padding: 3px 6px;
+  font-size: .67rem;
+  font-weight: 600;
+}
+
+.clock-view .zone-time {
+  margin-top: auto;
+}
+
+.clock-view .zone-time h1 {
+  margin: 0 0 2px;
+  color: var(--workspace-heading);
+  font-family: inherit;
+  font-size: 1.8rem;
+  line-height: 1.2;
+  letter-spacing: -.025em;
+}
+
+.clock-view .zone-time > p {
+  margin-right: 76px;
+  letter-spacing: 0;
+}
+
+.clock-view .zone-card-actions {
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
+  gap: 3px;
+}
+
+.clock-view .btn-card-action {
+  color: var(--workspace-muted);
+  padding: 4px;
+}
+
+.clock-view .btn-card-action:hover {
+  background: var(--workspace-input);
+  color: var(--workspace-heading);
+}
+
+.clock-view .btn-card-action.favorite-active {
+  color: var(--workspace-blue-text);
+}
+
+.clock-view .card-people {
+  border-color: var(--workspace-line);
+}
+
+.clock-view .card-person {
+  background: var(--workspace-blue-surface);
+  border-color: var(--workspace-line);
+}
+
+.clock-view .card-person-name {
+  color: var(--workspace-heading);
+}
+
+.clock-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 24px;
+  color: var(--workspace-muted);
+  text-align: center;
+}
+
+.clock-empty h3 {
+  color: var(--workspace-heading);
+}
+
+.clock-view .settings-dropdown,
+.clock-view .modal-content,
+.clock-view .mobile-settings-sheet {
+  background: var(--workspace-sidebar);
+  border-color: var(--workspace-line);
+  color: var(--workspace-heading);
+}
+
+.clock-view .settings-title,
+.clock-view .modal-header {
+  border-color: var(--workspace-line);
+  color: var(--workspace-heading);
+}
+
+.clock-view .settings-label,
+.clock-view .modal-search-icon,
+.clock-view .city-item-info p {
+  color: var(--workspace-muted);
+}
+
+.clock-view .modal-search input,
+.clock-view .city-item,
+.clock-view .settings-home-hours input,
+.clock-view .mobile-home-hours input {
+  background: var(--workspace-input);
+  border-color: var(--workspace-line);
+  color: var(--workspace-heading);
+}
+
+.clock-view .modal-tabs {
+  border-color: var(--workspace-line);
+}
+
+.clock-view .tab-btn.active {
+  background: var(--workspace-blue-surface);
+  color: var(--workspace-blue-text);
+}
+
+.clock-view .city-item-timezone {
+  background: var(--workspace-surface);
+  border-color: var(--workspace-line);
+  color: var(--workspace-muted);
+}
+
+.clock-view .city-item {
+  width: 100%;
+  color: var(--workspace-heading);
+  font: inherit;
+  text-align: left;
+}
+
+.city-item-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 65px;
+  border: 1px solid var(--workspace-blue);
+  border-radius: 8px;
+  background: var(--workspace-blue);
+  color: var(--workspace-on-accent);
+  padding: 7px 10px;
+  font-size: .76rem;
+  font-weight: 600;
+}
+.city-item-action.added { border-color: var(--workspace-blue-surface); background: var(--workspace-blue-surface); color: var(--workspace-blue-text); }
+.city-item-controls, .city-item-added-label { display: inline-flex; align-items: center; gap: 10px; }
+
+.clock-view .city-item:hover,
+.clock-view .tab-btn:hover {
+  background: var(--workspace-blue-surface);
+}
+
+@media (max-width: 1200px) {
+  .clock-view .zones-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1024px) {
+  .clock-view .main-content {
+    padding: 26px 20px 105px;
+  }
+
+  .clock-view .mobile-clock-screen {
+    width: min(100%, 560px);
+    margin: 0 auto;
+    gap: 16px;
+  }
+
+  .clock-view .mobile-clock-header h1 {
+    color: var(--workspace-heading);
+    font-size: 1.7rem;
+  }
+
+  .clock-view .clock-heading-actions {
+    gap: 8px;
+  }
+
+  .clock-view .clock-favorites-filter {
+    padding: 6px 7px;
+    font-size: .68rem;
+  }
+
+  .clock-view .mobile-clock-header p {
+    margin-top: 4px;
+    color: var(--workspace-muted);
+    font-size: .76rem;
+  }
+
+  .clock-view .mobile-clock-add {
+    background: var(--workspace-blue);
+    box-shadow: none;
+  }
+
+  .clock-view .mobile-clock-search svg {
+    color: var(--workspace-muted);
+  }
+
+  .clock-view .mobile-clock-search input {
+    background: var(--workspace-input);
+    border-color: var(--workspace-line);
+    color: var(--workspace-heading);
+  }
+
+  .mobile-clock-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .clock-timeline-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--workspace-heading);
+  }
+
+  .mobile-clock-bars {
+    display: flex;
+    align-items: flex-end;
+    height: 34px;
+    gap: 3px;
+  }
+
+  .mobile-clock-bars button {
+    flex: 1;
+    min-width: 0;
+    height: 10px;
+    padding: 0;
+    border: 0;
+    border-radius: 3px;
+    background: var(--workspace-input);
+    cursor: pointer;
+  }
+
+  .mobile-clock-bars button.working {
+    height: 22px;
+    background: var(--workspace-blue-surface);
+  }
+
+  .mobile-clock-bars button.selected {
+    height: 22px;
+    background: var(--workspace-blue);
+  }
+
+  .mobile-clock-labels {
+    display: flex;
+    justify-content: space-between;
+    color: var(--workspace-muted);
+    font-size: .65rem;
+  }
+
+  .clock-time-travel-note {
+    color: var(--workspace-blue-text);
+    font-size: .72rem;
+  }
+
+  .clock-view .mobile-clock-row {
+    min-height: 82px;
+    gap: 8px;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    background: var(--workspace-surface);
+    border-color: var(--workspace-line);
+    color: var(--workspace-heading);
+  }
+
+  .mobile-clock-city {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mobile-clock-city h3 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .85rem;
+  }
+
+  .mobile-clock-city h3 span {
+    color: var(--workspace-muted);
+    font-size: .7rem;
+    font-weight: 500;
+  }
+
+  .clock-view .mobile-clock-row p,
+  .mobile-clock-time small {
+    color: var(--workspace-muted);
+    font-size: .67rem;
+  }
+
+  .mobile-clock-time {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+    white-space: nowrap;
+  }
+
+  .clock-view .mobile-clock-row > .mobile-clock-time {
+    flex: 0 0 auto;
+  }
+
+  .mobile-clock-time strong {
+    font-size: 1.04rem;
+  }
+
+  .mobile-clock-favorite,
+  .mobile-clock-more {
+    align-self: center;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--workspace-muted);
+    cursor: pointer;
+  }
+
+  .mobile-clock-favorite.active {
+    color: var(--workspace-blue-text);
+  }
+
+  .mobile-clock-actions,
+  .mobile-clock-people {
+    display: flex;
+    flex-basis: 100%;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--workspace-line);
+  }
+
+  .clock-view .mobile-clock-row > .mobile-clock-actions,
+  .clock-view .mobile-clock-row > .mobile-clock-people {
+    flex: 0 0 100%;
+  }
+
+  .mobile-clock-actions button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid var(--workspace-line);
+    border-radius: 8px;
+    background: var(--workspace-input);
+    color: var(--workspace-heading);
+    padding: 7px 9px;
+    font: inherit;
+    font-size: .7rem;
+    cursor: pointer;
+  }
+
+  .mobile-clock-people {
+    flex-wrap: wrap;
+    color: var(--workspace-muted);
+    font-size: .69rem;
+  }
+
+  .clock-view .mobile-clock-empty {
+    color: var(--workspace-muted);
+  }
+}
